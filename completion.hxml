@@ -1,0 +1,5 @@
+-cp src
+-main rss.server.Main
+-lib record-macros
+-x bin/main
+# -x bin/main
