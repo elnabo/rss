@@ -1,34 +1,42 @@
 package rss.server;
 
-import rss.server.db.Feed;
-import rss.server.db.Item;
+import rss.db.DB;
+import rss.db.Feed;
+
+import sys.FileSystem;
+import sys.io.File;
+
+using StringTools;
 
 class Main {
 
-	static var db(default, never) = "rss.db";
-
 	public static function main() {
-		initDB();
-		// new RSS("http://www.lemonde.fr/rss/une.xml");
+
+		var p = new sys.io.Process("echo $PPID");
+		var pid = (p.stdout.readAll().toString());
+
+		var lock = "lock";
+		if (FileSystem.exists(lock)) {
+			var lockpid = File.getContent(lock).trim();
+			if (FileSystem.exists("/proc/"+lockpid)) {
+				Sys.exit(0);
+			}
+			else {
+				FileSystem.deleteFile(lock);
+			}
+		}
+
+		File.saveContent(lock, pid);
+		
+		if (!DB.init()) { 
+			FileSystem.deleteFile(lock);
+			Sys.exit(1);
+		}
+
 		for (feed in Feed.all()) {
 			new RSS(feed.link);
-			trace(feed.link);
+			trace("Updated: "+feed.title);
 		}
-	}
-
-	public static function initDB() {
-		try {
-			sys.db.Manager.cnx = sys.db.Sqlite.open(db);
-			if ( !sys.db.TableCreate.exists(Feed.manager) ){
-				sys.db.TableCreate.create(Feed.manager);
-			}
-			if ( !sys.db.TableCreate.exists(Item.manager) ){
-				sys.db.TableCreate.create(Item.manager);
-			}
-		}
-		catch (e:Dynamic) {
-			trace(e);
-			Sys.exit(-1);
-		}
+		FileSystem.deleteFile(lock);
 	}
 }

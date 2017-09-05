@@ -2,4 +2,6 @@
 -main rss.server.Main
 -lib record-macros
 -x bin/main
+# -php bin/main
+# -cmd php bin/main/index.php
 # -x bin/main

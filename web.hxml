@@ -1,0 +1,4 @@
+-cp src
+-main rss.web.Index
+-lib record-macros
+-php www
