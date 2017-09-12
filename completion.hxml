@@ -1,6 +1,7 @@
 -cp src
 -main rss.server.Main
 -lib record-macros
+-lib format
 -x bin/main
 # -php bin/main
 # -cmd php bin/main/index.php

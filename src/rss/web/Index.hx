@@ -3,7 +3,6 @@ package rss.web;
 import php.Web;
 
 import rss.db.*;
-import rss.server.RSS;
 using StringTools;
 
 class Index {
@@ -26,7 +25,7 @@ class Index {
 
 			if (read != null) {
 				Item.markAsRead(read, value);
-				Sys.println('$read is ${value ? "read" : "unread"}');
+				Sys.print('$read is ${value ? "read" : "unread"}');
 				Sys.exit(0);
 			}
 		}
@@ -35,8 +34,18 @@ class Index {
 		if (params.exists("new")) {
 			var newFeed = params.get("new");
 			if (newFeed != null) {
-				var rss = new RSS(newFeed.urlDecode(),false, false);
-				Sys.println((rss.created) ? '${rss.feed.title} ${rss.feed.id}' : "");
+				var link = newFeed.urlDecode();
+				var process = new sys.io.Process("neko main.n --add "+ link);
+				var code = process.exitCode(true);
+				switch (code) {
+					case 0:
+						var feed = Feed.fromLink(link);
+						Sys.print('${feed.title} ${feed.id}');
+					case 3:
+						Sys.print("Exists");
+					default: 
+						Sys.print("Error");
+				}
 				Sys.exit(0);
 			}
 		}
@@ -57,7 +66,8 @@ class Index {
 		var showread = (params.exists("showread")) ? params.get("showread") == "true": true;
 		var dir = (params.exists("dir")) ? params.get("dir") == "true": true;
 
-		
+		untyped __php__('date_default_timezone_set("Europe/Paris")');
+
 		Sys.println('<!DOCTYPE html>\n<html>\n\t<head>
 		<meta charset="utf-8" />
 			<link rel="stylesheet" href="main.css"/>
@@ -65,11 +75,10 @@ class Index {
 			<title>Titre</title>
 		</head>
 		<body>');
-
 		listFeeds();
 		listItems(feed, showread, dir, id);
 
-		Sys.println('\t</body>\n</html>');
+		Sys.print('\t</body>\n</html>');
 
 	}
 
@@ -83,8 +92,7 @@ class Index {
 			counts.push(c);
 			counts[0] += c;
 		}
-		Sys.println(feeds.join(" "));
-		Sys.println(counts.join(" "));
+		Sys.print(feeds.join(" ") + "\n" + counts.join(" "));
 		Sys.exit(0);
 	}
 
@@ -106,6 +114,9 @@ class Index {
 			if (page.remainingLeft) {
 				Sys.println('<a id="top-left" href=$left> Left</a>');
 			}
+			else {
+				Sys.println('<span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>');
+			}
 			if (page.remainingRight) {
 				Sys.println('<a id="top-right" href=$right> Right</a>');
 			}
@@ -115,12 +126,16 @@ class Index {
 			}
 			Sys.println("</ul>");
 		}
+		else {
+			Sys.println("<ul>\n</ul>");
+		}
 		Sys.println("</article>");
 	}
 
 	public static function listFeeds() {
+		var unreadcount = Item.countUnread(null);
 		Sys.println('<nav><ul id="feedlist">');
-		Sys.println('<li><a href="index.php?feed=0">All</a></li>');
+		Sys.println('<li><a href="index.php?feed=0">All&nbsp;</a><span id="unreadcount-0">${unreadcount == 0 ? "" : ""+unreadcount}</li>');
 		for (feed in Feed.all()) {
 			Sys.println(feed.html);
 		}

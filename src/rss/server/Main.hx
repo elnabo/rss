@@ -10,7 +10,27 @@ using StringTools;
 
 class Main {
 
+	/* Exit:
+		0 : Succes
+		1 : Error
+		2 : Locked
+		3 : Feed already exist
+	*/
 	public static function main() {
+		var args = Sys.args();
+		if (args.length > 0 && args[0] == "--add") {
+			if (args.length >= 2) {
+				if (!DB.init()) { 
+					Sys.exit(1);
+				}
+				var rss = new RSS(args[1], false, false, false);
+				if (rss.feed == null) {
+					Sys.exit(1);
+				}
+				Sys.exit(rss.created ? 0 : 3);
+			}
+			Sys.exit(1);
+		}
 
 		var p = new sys.io.Process("echo $PPID");
 		var pid = (p.stdout.readAll().toString());
@@ -19,7 +39,7 @@ class Main {
 		if (FileSystem.exists(lock)) {
 			var lockpid = File.getContent(lock).trim();
 			if (FileSystem.exists("/proc/"+lockpid)) {
-				Sys.exit(0);
+				Sys.exit(2);
 			}
 			else {
 				FileSystem.deleteFile(lock);
@@ -32,6 +52,8 @@ class Main {
 			FileSystem.deleteFile(lock);
 			Sys.exit(1);
 		}
+
+		// new RSS("https://www.betaseries.com/rss/planning/elnabo");
 
 		for (feed in Feed.all()) {
 			new RSS(feed.link);

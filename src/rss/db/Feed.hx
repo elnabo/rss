@@ -17,7 +17,8 @@ class Feed extends sys.db.Object {
 	@:skip
 	public var html(get, never):String;
 	public function get_html() {
-		return '<li><a href="index.php?feed=${id}">${title}</a></li>';
+		var count = Item.countUnread(this);
+		return '<li><a id="feed-${id}"href="index.php?feed=${id}">${title}&nbsp;</a><span id="unreadcount-${id}">${count == 0 ? "": ""+count}</span></li>';
 	}
 
 	public static function create(link:String, descr:String, title:String, ?log:Bool=true) {
@@ -56,5 +57,11 @@ class Feed extends sys.db.Object {
 			item.delete();
 		}
 		feed.delete();
+	}
+
+	public static function readAll(feed:Feed) {
+		for (item in Item.unreadFrom(feed)) {
+			Item.markAsRead(item.id, true);
+		}
 	}
 }

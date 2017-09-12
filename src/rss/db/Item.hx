@@ -48,7 +48,7 @@ class Item extends sys.db.Object {
 </li>';
 	}
 
-	public static function create(link:String, descr:String, title:String, pubDate:String, source:Feed, ?log:Bool=true) {
+	public static function create(link:String, descr:String, title:String, pubDate:String, source:Feed, ?asRead:Bool=false, ?log:Bool=true) {
 		var match = manager.search($link == link && $descr == descr && $title == title && $source == source);
 		if (match.isEmpty()) {
 			var item = new Item();
@@ -58,7 +58,7 @@ class Item extends sys.db.Object {
 			item.pubDate = pubDate;
 			item.source = source;
 			item.timestamp = Date.now().getTime();
-			item.read = 0;
+			item.read = (asRead) ? 1 : 0;
 			item.updated = 0;
 			item.insert();
 			if (log) {
@@ -211,6 +211,6 @@ class Item extends sys.db.Object {
 	}
 
 	public static function countUnread(feed:Feed) {
-		return manager.count($source == feed && $read ==0);
+		return (feed == null) ? manager.count($read ==0) : manager.count($source == feed && $read ==0);
 	}
 }
