@@ -14,11 +14,9 @@ class Feed extends sys.db.Object {
 	@:skip
 	public var justCreated = false;
 
-	@:skip
-	public var html(get, never):String;
-	public function get_html() {
+	public function toHtml(?extraArgs:String="") {
 		var count = Item.countUnread(this);
-		return '<li><a id="feed-${id}"href="index.php?feed=${id}">${title}&nbsp;</a><span id="unreadcount-${id}">${count == 0 ? "": ""+count}</span></li>';
+		return '<li><a id="feed-${id}"href="index.php?feed=${id}$extraArgs">${title}&nbsp;</a><span id="unreadcount-${id}">${count == 0 ? "": ""+count}</span><button class="readAll" onclick="markAllAsRead(${id})">Read</button></li>';
 	}
 
 	public static function create(link:String, descr:String, title:String, ?log:Bool=true) {

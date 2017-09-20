@@ -1,4 +1,4 @@
-async function addFeed () {
+function addFeed () {
 	var url = "index.php?new=" + encodeURIComponent(document.getElementById("new").value);
 	var xhr = new XMLHttpRequest();
 	xhr.open("GET", url, true);
@@ -84,10 +84,39 @@ function markAsRead(id) {
 			else {
 				element.setAttribute("onclick", "markAsRead("+id+")");
 			}
-	  }
+		}
 	};
 	xhr.onerror = function (e) {
-	  console.error(xhr.statusText);
+		console.error(xhr.statusText);
+	};
+	xhr.send(null); 
+}
+
+function markAllAsRead(id) {
+	var url = "index.php?markAll="+id;
+	var xhr = new XMLHttpRequest();
+
+	xhr.open("GET", url, true);
+	xhr.onload = function (e) {
+	  if (xhr.readyState === 4) {
+			if (xhr.status === 200) {
+				var resp = xhr.responseText;
+				if (resp == "OK") {
+					updateCount();
+					return;
+				}
+				else {
+					console.log(resp);
+					alert("Unable to read all");
+				}
+			}
+		}
+		else {
+			alert("Unable to read all");
+		}
+	};
+	xhr.onerror = function (e) {
+		console.error(xhr.statusText);
 	};
 	xhr.send(null); 
 }

@@ -35,7 +35,10 @@ class Main {
 		var p = new sys.io.Process("echo $PPID");
 		var pid = (p.stdout.readAll().toString());
 
-		var lock = "lock";
+		var path = Sys.programPath().split("/");
+		path.pop();
+		path.push("lock");
+		var lock = path.join("/");
 		if (FileSystem.exists(lock)) {
 			var lockpid = File.getContent(lock).trim();
 			if (FileSystem.exists("/proc/"+lockpid)) {

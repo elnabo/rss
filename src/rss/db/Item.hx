@@ -67,13 +67,24 @@ class Item extends sys.db.Object {
 			return item;
 		}
 		else {
-			var item = match.first();
-			if (item.pubDate != pubDate) {
-				item.updated = 1;
+			var exactMatch = manager.search($link == link && $descr == descr && $title == title && $source == source && $pubDate == pubDate);
+			if (exactMatch.isEmpty()) {
+				var item = new Item();
+				item.link = link;
+				item.descr = descr;
+				item.title = title;
+				item.pubDate = pubDate;
+				item.source = source;
 				item.timestamp = Date.now().getTime();
-				item.update();
+				item.read = (asRead) ? 1 : 0;
+				item.updated = 1;
+				item.insert();
+				if (log) {
+					trace("new item ", source);
+				}
+				return item;
 			}
-			return item;
+			return match.first();
 		}
 	}
 
@@ -212,5 +223,10 @@ class Item extends sys.db.Object {
 
 	public static function countUnread(feed:Feed) {
 		return (feed == null) ? manager.count($read ==0) : manager.count($source == feed && $read ==0);
+	}
+
+	public static function lastId() {
+		var i = all().first();
+		return (i == null) ? 0 : i.id;
 	}
 }
